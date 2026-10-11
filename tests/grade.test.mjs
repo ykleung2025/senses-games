@@ -163,13 +163,21 @@ for (const file of ["match.html", "scenario.html"]) {
 
 const matchJs = fs.readFileSync(path.join(root, "js/match.js"), "utf8");
 const scenarioJs = fs.readFileSync(path.join(root, "js/scenario.js"), "utf8");
+const scenarioHtml = fs.readFileSync(path.join(root, "scenario.html"), "utf8");
 assert(matchJs.includes("js-option-speak"), "match option speak");
 assert(matchJs.includes("朗讀"), "match speak label");
 assert(matchJs.includes('icons.icon(id)'), "match uses organ emoji including tooth");
+assert(matchJs.includes("touchmove"), "touch move");
+assert(matchJs.includes("touchend"), "touch drop");
 assert(scenarioJs.includes("js-option-speak"), "scenario option speak");
 assert(scenarioJs.includes("朗讀"), "scenario speak label");
+assert(scenarioJs.includes("data-speak"), "per-option speak");
 assert(!matchJs.includes("bindButtons"), "match does not read the whole page");
 assert(!scenarioJs.includes("bindButtons"), "scenario does not read the whole page");
+assert(scenarioHtml.includes('id="speak-scenario"'), "scenario speak button");
+assert(scenarioHtml.includes("朗讀情境"), "scenario speak label");
+assert(scenarioHtml.includes("js-option-speak"), "scenario speak uses option speech");
+assert(css.includes("touch-action: none"), "organ touch drag");
 
 const speechJs = fs.readFileSync(path.join(root, "js/speech.js"), "utf8");
 assert(speechJs.includes("synth.cancel"), "stop before new speech");
@@ -203,7 +211,7 @@ vm.createContext(speechBox);
 vm.runInContext(fs.readFileSync(path.join(root, "js/speech.js"), "utf8"), speechBox, { filename: "js/speech.js" });
 speechBox.SenseSpeech.speak("眼睛");
 speechBox.SenseSpeech.speak("耳朵");
-assert(synth.cancels === 1, "new 朗讀 stops the previous utterance");
+assert(synth.cancels === 2, "each 朗讀 cancels before it speaks");
 assert(synth.spoken.map((item) => item.text).join(",") === "眼睛,耳朵", "speaks each option");
 assert(synth.spoken.every((item) => item.voice === "zh-HK" && item.lang === "zh-HK"), "uses zh-HK voice");
 assert(speechJs.includes("bindOptionSpeakers"), "per option speakers");

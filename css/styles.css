@@ -400,7 +400,22 @@ button:focus-visible,
   border: 3px solid var(--edge, transparent);
   background: var(--tint, #fff);
   overflow: visible;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
 }
+
+.organ .icon,
+.organ img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.organ.is-source { opacity: 0.5; }
 
 .organ[data-organ="eye"] { --tint: #e7f1fc; --edge: #b9d4f5; }
 .organ[data-organ="ear"] { --tint: #f3eaff; --edge: #d7c6f3; }
@@ -506,6 +521,13 @@ button:focus-visible,
 
 .not-sense span { font-size: 0.95rem; color: #6a4a28; font-weight: 400; }
 
+body.is-dragging {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body.is-dragging .organ:active { transform: none; }
+
 body.is-dragging .fn,
 body.is-dragging .not-sense {
   outline: 3px dashed var(--teal);
@@ -563,6 +585,45 @@ body.is-dragging .drop-hot {
   font-size: 1.15rem;
   margin: 12px 0 0;
   line-height: 1.55;
+}
+
+.q-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.q-row .q-text {
+  margin: 0;
+  flex: 1 1 12rem;
+}
+
+.speak-prominent {
+  flex: none;
+  min-height: 56px;
+  padding: 12px 16px;
+  font-size: 1.08rem;
+}
+
+.choice-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.choice-row .choice {
+  flex: 1;
+  min-width: 0;
+}
+
+.choice-row .speak-btn {
+  flex: none;
+  align-self: center;
+  min-width: 72px;
+  padding: 8px 12px;
 }
 
 .step-note { margin: 0 0 10px; color: var(--muted); }

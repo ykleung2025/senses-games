@@ -116,6 +116,8 @@
     sceneCard.dataset.step = String(state.step);
     qTitle.textContent = q.title;
     qText.textContent = q.text;
+    var scenarioSpeak = document.getElementById("speak-scenario");
+    if (scenarioSpeak) scenarioSpeak.setAttribute("data-speak", q.title + "。" + q.text);
     scene.innerHTML = icons.scene(q.id);
     renderStars();
     if (state.step === 1) {
