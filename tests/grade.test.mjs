@@ -79,24 +79,36 @@ purposes(6, ["know"], false);
 purposes(8, ["know"], true);
 purposes(9, ["know"], true);
 
+const sceneFiles = {
+  1: "scenario-1-hallway.jpg",
+  2: "scenario-2-playground.jpg",
+  3: "scenario-3-classroom-smell.jpg",
+  4: "scenario-4-kettle.jpg",
+  5: "scenario-5-canteen.jpg",
+  6: "scenario-6-library.jpg",
+  7: "scenario-7-stairs.jpg",
+  8: "scenario-8-art.jpg",
+  9: "scenario-9-listen.jpg",
+  10: "scenario-10-soap.jpg"
+};
+
 for (const item of lab.QUESTIONS) {
   const text = item.title + item.text + item.explain;
   assert(!/關掉|補救|失去感覺/.test(text), "no lost-sense prompt in q" + item.id);
   const picture = icons.scene(item.id);
+  const file = sceneFiles[item.id];
   assert(!/object-fit:\s*cover/.test(picture), "scene not cover " + item.id);
-  if (item.id === 1) {
-    assert(picture.includes("<img") && picture.includes("scenario-1-hallway.jpg?v=2"), "scene 1 photo");
-    assert(picture.includes("樂樂") && picture.includes("天天"), "scene 1 names the mascots");
-  } else {
-    assert(picture.includes("<svg") && picture.includes("viewBox"), "scene " + item.id);
-  }
+  assert(picture.includes("<img") && picture.includes("assets/scenes/" + file + "?v=3"), "scene " + item.id);
+  assert(picture.includes('class="scene-photo"'), "scene photo class " + item.id);
+  assert(fs.existsSync(path.join(root, "assets/scenes/" + file)), "scene file " + item.id);
 }
 
 for (const name of ["eye", "ear", "nose", "tongue", "skin", "tooth"]) {
   const picture = icons.icon(name);
-  assert(picture.includes("<img") && picture.includes("assets/organs/" + name + ".webp?v=2"), "photo " + name);
+  assert(picture.includes("<img") && picture.includes("assets/organs/" + name + ".png?v=3"), "emoji " + name);
   assert(!picture.includes("<svg"), "organ not svg " + name);
-  assert(fs.existsSync(path.join(root, "assets/organs/" + name + ".webp")), "file " + name);
+  assert(fs.existsSync(path.join(root, "assets/organs/" + name + ".png")), "file " + name);
+  assert(!fs.existsSync(path.join(root, "assets/organs/" + name + ".webp")), "webp removed " + name);
 }
 
 for (const name of ["shield", "bulb", "search", "star", "starOff"]) {
@@ -137,17 +149,34 @@ assert(css.includes(".scene-photo"), "scene photo style");
 const indexHtml = fs.readFileSync(path.join(root, "index.html"), "utf8");
 assert(!indexHtml.includes("teacher"), "teacher block removed");
 assert(!indexHtml.includes("三分鐘"), "teacher demo removed");
-assert(indexHtml.includes("css/styles.css?v=2"), "index css cache");
-assert(indexHtml.includes("js/icons.js?v=2"), "index js cache");
+assert(indexHtml.includes("css/styles.css?v=3"), "index css cache");
+assert(indexHtml.includes("js/icons.js?v=3"), "index js cache");
+assert(!indexHtml.includes("?v=2"), "index cache bumped");
 
 for (const file of ["match.html", "scenario.html"]) {
   const html = fs.readFileSync(path.join(root, file), "utf8");
-  assert(html.includes("js-speak"), file + " speak button");
-  assert(html.includes("朗讀"), file + " speak label");
-  assert(html.includes("js/speech.js?v=2"), file + " speech script");
-  assert(html.includes("css/styles.css?v=2"), file + " css cache");
+  assert(!html.includes("js-speak"), file + " has no page speak button");
+  assert(html.includes("js/speech.js?v=3"), file + " speech script");
+  assert(html.includes("css/styles.css?v=3"), file + " css cache");
+  assert(!html.includes("?v=2"), file + " cache bumped");
 }
-assert(fs.readFileSync(path.join(root, "js/speech.js"), "utf8").includes("synth.cancel"), "stop before new speech");
+
+const matchJs = fs.readFileSync(path.join(root, "js/match.js"), "utf8");
+const scenarioJs = fs.readFileSync(path.join(root, "js/scenario.js"), "utf8");
+assert(matchJs.includes("js-option-speak"), "match option speak");
+assert(matchJs.includes("朗讀"), "match speak label");
+assert(matchJs.includes('icons.icon(id)'), "match uses organ emoji including tooth");
+assert(scenarioJs.includes("js-option-speak"), "scenario option speak");
+assert(scenarioJs.includes("朗讀"), "scenario speak label");
+assert(!matchJs.includes("bindButtons"), "match does not read the whole page");
+assert(!scenarioJs.includes("bindButtons"), "scenario does not read the whole page");
+
+const speechJs = fs.readFileSync(path.join(root, "js/speech.js"), "utf8");
+assert(speechJs.includes("synth.cancel"), "stop before new speech");
+assert(speechJs.includes("bindOptionSpeakers"), "per option speakers");
+assert(speechJs.includes('lang === "zh-hk"'), "prefer zh-HK");
+assert(speechJs.includes('lang === "zh-yue"'), "prefer zh-yue");
+assert(speechJs.includes('lang === "yue"'), "prefer yue");
 
 if (failed) {
   console.error(failed + " failed");

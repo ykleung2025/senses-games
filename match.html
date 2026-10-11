@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>感官配對｜樂華天主教小學</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 <body>
   <a class="skip" href="#main">跳到遊戲</a>
@@ -26,7 +26,6 @@
       <div id="dots" class="dots" aria-hidden="true"></div>
       <button type="button" id="restart" class="text-btn">重新開始</button>
       <button type="button" id="show-end" class="text-btn" hidden>查看成績</button>
-      <button type="button" class="speak-btn js-speak" aria-pressed="false">朗讀</button>
       <p id="speak-status" class="speak-status" role="status"></p>
     </div>
     <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
@@ -43,16 +42,14 @@
     <p class="score-big">得分 <span id="end-score">0</span>／5</p>
     <ul id="end-list" class="end-list"></ul>
     <p id="end-trap" class="end-trap"></p>
-    <p class="speak-status" role="status"></p>
     <div class="end-actions">
-      <button type="button" class="speak-btn js-speak" aria-pressed="false">朗讀</button>
       <button type="button" id="replay" class="primary">再玩一次</button>
       <a class="secondary" href="index.html">返回首頁</a>
     </div>
   </dialog>
-  <script src="js/data.js?v=2"></script>
-  <script src="js/icons.js?v=2"></script>
-  <script src="js/speech.js?v=2"></script>
-  <script src="js/match.js?v=2"></script>
+  <script src="js/data.js?v=3"></script>
+  <script src="js/icons.js?v=3"></script>
+  <script src="js/speech.js?v=3"></script>
+  <script src="js/match.js?v=3"></script>
 </body>
 </html>

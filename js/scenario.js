@@ -54,11 +54,12 @@
   }
 
   function renderChoices() {
-    var q = current();
     var items = state.step === 1 ? lab.SENSES : lab.PURPOSES;
     choices.replaceChildren();
     items.forEach(function (item) {
       var pressed = state.selected.has(item.id);
+      var row = document.createElement("div");
+      row.className = "option-row";
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "choice";
@@ -75,8 +76,16 @@
       name.className = "name";
       name.textContent = item.name;
       btn.append(box, icon, name);
-      choices.appendChild(btn);
+      var speak = document.createElement("button");
+      speak.type = "button";
+      speak.className = "speak-btn speak-mini js-option-speak";
+      speak.setAttribute("data-speak", item.name);
+      speak.setAttribute("aria-label", "朗讀：" + item.name);
+      speak.textContent = "朗讀";
+      row.append(btn, speak);
+      choices.appendChild(row);
     });
+    if (globalThis.SenseSpeech) globalThis.SenseSpeech.syncOptionButtons();
   }
 
   function renderExplain() {
@@ -179,31 +188,7 @@
     render();
   }
 
-  function speechText() {
-    if (endDialog.open) {
-      var done = ["十個情境都完成了。", "星星 " + state.stars + "／10。", "一次就答對 " + state.firstTry + " 題。"];
-      endDialog.querySelectorAll(".end-list li").forEach(function (li) {
-        done.push(li.textContent);
-      });
-      return done.join("");
-    }
-    var q = current();
-    var parts = [q.title + "。" + q.text];
-    if (state.step === 1) {
-      parts.push("用了哪些感覺器官？可以選多個。");
-    } else if (state.step === 2) {
-      parts.push("這些感覺主要有什麼作用？可以選多個。");
-    } else {
-      parts.push("你選了：" + orderedNames(state.sensePick, lab.SENSES).join("、") + "。");
-      parts.push(q.explain);
-    }
-    var items = state.step === 1 ? lab.SENSES : lab.PURPOSES;
-    parts.push(items.map(function (item) { return item.name; }).join("、") + "。");
-    if (feedback.textContent) parts.push(feedback.textContent);
-    return parts.join("");
-  }
-
-  var speaker = globalThis.SenseSpeech.bindButtons(speechText);
+  var speaker = globalThis.SenseSpeech.bindOptionSpeakers();
 
   function goNext() {
     speaker.stop();
