@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>情境選感官｜樂華天主教小學</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=2">
 </head>
 <body>
   <a class="skip" href="#main">跳到遊戲</a>
@@ -27,9 +27,14 @@
       <div id="star-row" class="star-row" aria-hidden="true"></div>
       <div class="bar" aria-hidden="true"><span id="bar-fill"></span></div>
       <button type="button" id="restart" class="text-btn">重新開始</button>
+      <button type="button" class="speak-btn js-speak" aria-pressed="false">朗讀</button>
+      <p id="speak-status" class="speak-status" role="status"></p>
     </div>
     <article id="scene-card" class="scene-card">
-      <h2 id="q-title">走廊轉角</h2>
+      <div class="scene-head">
+        <h2 id="q-title">走廊轉角</h2>
+        <button type="button" class="speak-btn js-speak" aria-pressed="false">朗讀</button>
+      </div>
       <div id="scene" class="scene"></div>
       <p id="q-text" class="q-text"></p>
     </article>
@@ -58,14 +63,17 @@
       <li>解決生活問題：例如飯堂看號碼牌、聽廣播才入座。</li>
       <li>認識事物的特性：例如摸紙，分辨粗糙還是光滑。</li>
     </ul>
+    <p class="speak-status" role="status"></p>
     <div class="end-actions">
+      <button type="button" class="speak-btn js-speak" aria-pressed="false">朗讀</button>
       <button type="button" id="replay" class="primary">再玩一次</button>
       <a class="secondary" href="index.html">返回首頁</a>
     </div>
   </dialog>
-  <script src="js/data.js"></script>
-  <script src="js/icons.js"></script>
-  <script src="js/scenes.js"></script>
-  <script src="js/scenario.js"></script>
+  <script src="js/data.js?v=2"></script>
+  <script src="js/icons.js?v=2"></script>
+  <script src="js/scenes.js?v=2"></script>
+  <script src="js/speech.js?v=2"></script>
+  <script src="js/scenario.js?v=2"></script>
 </body>
 </html>

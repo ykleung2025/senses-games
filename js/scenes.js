@@ -41,6 +41,12 @@
   }
 
   function placed(name, x, y, size) {
+    var shot = globalThis.SenseIcons.photo(name);
+    if (shot) {
+      return (
+        '<image href="' + shot.src + '" x="' + x + '" y="' + y + '" width="' + size + '" height="' + size + '" preserveAspectRatio="xMidYMid meet"/>'
+      );
+    }
     var raw = globalThis.SenseIcons.icon(name).trim();
     var inner = raw.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
     return '<svg x="' + x + '" y="' + y + '" width="' + size + '" height="' + size + '" viewBox="0 0 64 64" preserveAspectRatio="xMidYMid meet">' + inner + "</svg>";
@@ -55,20 +61,8 @@
 
   var drawers = {
     1: function () {
-      return stage(
-        "走廊轉角，聽見急促腳步聲",
-        ground(132, "#f3e6cf") +
-          '<rect x="22" y="28" width="150" height="104" fill="#f7f1e6"/>' +
-          '<rect x="172" y="28" width="166" height="104" fill="#efe2cc"/>' +
-          '<path d="M172 28v104" fill="none" stroke="#24312e" stroke-width="3"/>' +
-          '<circle cx="78" cy="46" r="8" fill="#ffe08a" stroke="#24312e" stroke-width="2"/>' +
-          kid(78, 96, "#2f7de1") +
-          waves(108, 92, "#7a5cdb") +
-          '<ellipse cx="214" cy="158" rx="8" ry="5" fill="#d7c4a4"/>' +
-          '<ellipse cx="246" cy="162" rx="8" ry="5" fill="#d7c4a4"/>' +
-          '<ellipse cx="278" cy="156" rx="8" ry="5" fill="#d7c4a4"/>' +
-          kid(318, 98, "#e39b2b") +
-          '<path d="M292 108h-16M292 118h-12" fill="none" stroke="#c47a3a" stroke-width="3" stroke-linecap="round"/>'
+      return (
+        '<img class="scene-photo" src="assets/scenes/scenario-1-hallway.jpg?v=2" width="1280" height="720" alt="樂樂和天天在學校走廊。樂樂揮手，天天行過彩色儲物櫃。" decoding="async">'
       );
     },
     2: function () {

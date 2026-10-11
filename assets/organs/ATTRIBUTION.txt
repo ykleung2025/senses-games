@@ -1,0 +1,44 @@
+感覺器官圖片來源（維基共享資源）。授權允許學校使用。頁面以 object-fit: contain 顯示整張圖，沒有裁走器官。
+
+眼睛
+檔名：Human eye close up, anterior view
+作者：Rapidreflex
+授權：CC BY-SA 4.0
+https://commons.wikimedia.org/wiki/File:Human_eye_close_up,_anterior_view.jpg
+https://creativecommons.org/licenses/by-sa/4.0
+
+耳朵
+檔名：Human right ear (cropped)
+作者：Genusfotografen (Tomas Gunnarsson) / Wikimedia Sverige
+授權：CC BY-SA 4.0
+https://commons.wikimedia.org/wiki/File:Human_right_ear_(cropped).jpg
+https://creativecommons.org/licenses/by-sa/4.0
+
+鼻子
+檔名：Nose.agr
+作者：ArnoldReinhold
+授權：CC BY-SA 3.0
+https://commons.wikimedia.org/wiki/File:Nose.agr.jpg
+https://creativecommons.org/licenses/by-sa/3.0
+
+舌頭
+檔名：Tongue and taste buds
+作者：Saurabh R. Patil
+授權：CC BY-SA 3.0
+https://commons.wikimedia.org/wiki/File:Tongue_and_taste_buds.jpg
+https://creativecommons.org/licenses/by-sa/3.0
+
+皮膚
+檔名：Skin
+作者：Stiller Beobachter from Ansbach, Germany
+授權：CC BY 2.0
+https://commons.wikimedia.org/wiki/File:Skin_-_Flickr_-_Stiller_Beobachter.jpg
+https://creativecommons.org/licenses/by/2.0
+
+牙齒
+檔名：Smiling Woman（只取口部，上下牙齒都留在畫面內）
+作者：StymShinji
+授權：CC0
+源自 Andrea Piacquadio 的相片，經 OpenClipart 再繪
+https://commons.wikimedia.org/wiki/File:Smiling_Woman.png
+https://creativecommons.org/publicdomain/zero/1.0/

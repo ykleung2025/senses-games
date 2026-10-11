@@ -83,17 +83,42 @@ for (const item of lab.QUESTIONS) {
   const text = item.title + item.text + item.explain;
   assert(!/關掉|補救|失去感覺/.test(text), "no lost-sense prompt in q" + item.id);
   const picture = icons.scene(item.id);
-  assert(picture.includes("<svg") && picture.includes("viewBox"), "scene " + item.id);
   assert(!/object-fit:\s*cover/.test(picture), "scene not cover " + item.id);
+  if (item.id === 1) {
+    assert(picture.includes("<img") && picture.includes("scenario-1-hallway.jpg?v=2"), "scene 1 photo");
+    assert(picture.includes("樂樂") && picture.includes("天天"), "scene 1 names the mascots");
+  } else {
+    assert(picture.includes("<svg") && picture.includes("viewBox"), "scene " + item.id);
+  }
 }
 
-for (const name of ["eye", "ear", "nose", "tongue", "skin", "tooth", "shield", "bulb", "search", "star", "starOff"]) {
+for (const name of ["eye", "ear", "nose", "tongue", "skin", "tooth"]) {
+  const picture = icons.icon(name);
+  assert(picture.includes("<img") && picture.includes("assets/organs/" + name + ".webp?v=2"), "photo " + name);
+  assert(!picture.includes("<svg"), "organ not svg " + name);
+  assert(fs.existsSync(path.join(root, "assets/organs/" + name + ".webp")), "file " + name);
+}
+
+for (const name of ["shield", "bulb", "search", "star", "starOff"]) {
   const picture = icons.icon(name);
   assert(picture.includes("viewBox=\"0 0 64 64\""), "icon " + name);
 }
 
+assert(fs.existsSync(path.join(root, "assets/scenes/scenario-1-hallway.jpg")), "hallway art");
+
+load("js/speech.js");
+const speech = sandbox.SenseSpeech;
+const yue = { lang: "zh-HK", name: "Google Cantonese" };
+const mandarin = { lang: "zh-TW", name: "Google Mandarin" };
+const yueLang = { lang: "yue-HK", name: "Cantonese" };
+assert(speech.scoreVoice(yue) > speech.scoreVoice(mandarin), "prefer zh-HK");
+assert(speech.pickVoice([mandarin, yue]).lang === "zh-HK", "pick zh-HK");
+assert(speech.pickVoice([yueLang]).lang === "yue-HK", "pick yue");
+assert(speech.pickVoice([{ lang: "en-US", name: "English" }]) === null, "ignore english");
+assert(speech.scoreVoice({ lang: "zh-yue", name: "Hong Kong" }) >= 100, "zh-yue");
+
 const banned = ["感觉", "牙齿", "颜色", "软", "这", "听", "过", "学", "国", "书", "对", "问", "题", "选", "门", "东", "发", "从", "还", "进", "边", "气", "与", "会", "为", "广", "观", "识", "脚", "关", "开", "来", "时", "个", "后"];
-const files = ["index.html", "match.html", "scenario.html", "README.md", "js/data.js", "js/match.js", "js/scenario.js", "js/scenes.js", "css/styles.css"];
+const files = ["index.html", "match.html", "scenario.html", "README.md", "js/data.js", "js/match.js", "js/scenario.js", "js/scenes.js", "js/icons.js", "js/speech.js", "css/styles.css", "assets/organs/ATTRIBUTION.txt"];
 for (const file of files) {
   const text = fs.readFileSync(path.join(root, file), "utf8");
   for (const word of banned) {
@@ -102,6 +127,27 @@ for (const file of files) {
     }
   }
 }
+
+const css = fs.readFileSync(path.join(root, "css/styles.css"), "utf8");
+assert(!/object-fit:\s*cover/.test(css), "css does not cover-crop");
+assert(css.includes("object-fit: contain"), "css contains photos");
+assert(!css.includes(".teacher"), "teacher css removed");
+assert(css.includes(".scene-photo"), "scene photo style");
+
+const indexHtml = fs.readFileSync(path.join(root, "index.html"), "utf8");
+assert(!indexHtml.includes("teacher"), "teacher block removed");
+assert(!indexHtml.includes("三分鐘"), "teacher demo removed");
+assert(indexHtml.includes("css/styles.css?v=2"), "index css cache");
+assert(indexHtml.includes("js/icons.js?v=2"), "index js cache");
+
+for (const file of ["match.html", "scenario.html"]) {
+  const html = fs.readFileSync(path.join(root, file), "utf8");
+  assert(html.includes("js-speak"), file + " speak button");
+  assert(html.includes("朗讀"), file + " speak label");
+  assert(html.includes("js/speech.js?v=2"), file + " speech script");
+  assert(html.includes("css/styles.css?v=2"), file + " css cache");
+}
+assert(fs.readFileSync(path.join(root, "js/speech.js"), "utf8").includes("synth.cancel"), "stop before new speech");
 
 if (failed) {
   console.error(failed + " failed");
