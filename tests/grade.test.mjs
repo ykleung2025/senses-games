@@ -98,14 +98,14 @@ for (const item of lab.QUESTIONS) {
   const picture = icons.scene(item.id);
   const file = sceneFiles[item.id];
   assert(!/object-fit:\s*cover/.test(picture), "scene not cover " + item.id);
-  assert(picture.includes("<img") && picture.includes("assets/scenes/" + file + "?v=3"), "scene " + item.id);
+  assert(picture.includes("<img") && picture.includes("assets/scenes/" + file + "?v=4"), "scene " + item.id);
   assert(picture.includes('class="scene-photo"'), "scene photo class " + item.id);
   assert(fs.existsSync(path.join(root, "assets/scenes/" + file)), "scene file " + item.id);
 }
 
 for (const name of ["eye", "ear", "nose", "tongue", "skin", "tooth"]) {
   const picture = icons.icon(name);
-  assert(picture.includes("<img") && picture.includes("assets/organs/" + name + ".png?v=3"), "emoji " + name);
+  assert(picture.includes("<img") && picture.includes("assets/organs/" + name + ".png?v=4"), "emoji " + name);
   assert(!picture.includes("<svg"), "organ not svg " + name);
   assert(fs.existsSync(path.join(root, "assets/organs/" + name + ".png")), "file " + name);
   assert(!fs.existsSync(path.join(root, "assets/organs/" + name + ".webp")), "webp removed " + name);
@@ -149,15 +149,15 @@ assert(css.includes(".scene-photo"), "scene photo style");
 const indexHtml = fs.readFileSync(path.join(root, "index.html"), "utf8");
 assert(!indexHtml.includes("teacher"), "teacher block removed");
 assert(!indexHtml.includes("三分鐘"), "teacher demo removed");
-assert(indexHtml.includes("css/styles.css?v=3"), "index css cache");
-assert(indexHtml.includes("js/icons.js?v=3"), "index js cache");
+assert(indexHtml.includes("css/styles.css?v=4"), "index css cache");
+assert(indexHtml.includes("js/icons.js?v=4"), "index js cache");
 assert(!indexHtml.includes("?v=2"), "index cache bumped");
 
 for (const file of ["match.html", "scenario.html"]) {
   const html = fs.readFileSync(path.join(root, file), "utf8");
   assert(!html.includes("js-speak"), file + " has no page speak button");
-  assert(html.includes("js/speech.js?v=3"), file + " speech script");
-  assert(html.includes("css/styles.css?v=3"), file + " css cache");
+  assert(html.includes("js/speech.js?v=4"), file + " speech script");
+  assert(html.includes("css/styles.css?v=4"), file + " css cache");
   assert(!html.includes("?v=2"), file + " cache bumped");
 }
 
