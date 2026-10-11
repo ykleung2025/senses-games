@@ -92,8 +92,8 @@
       utter.rate = 0.9;
       var voice = pickVoice(synth.getVoices());
       if (voice) {
-        utter.voice = voice;
         if (voice.lang) utter.lang = voice.lang;
+        try { utter.voice = voice; } catch (err) { /* keep the language if the voice object is rejected */ }
       }
       utter.onstart = function () {
         if (mine === token && hooks.onstart) hooks.onstart();
@@ -112,7 +112,7 @@
         if (hooks.onend) hooks.onend();
       };
       try {
-        synth.resume();
+        try { synth.resume(); } catch (err) { /* already running */ }
         synth.speak(utter);
       } catch (err) {
         setStatus("暫時未能朗讀，請讀畫面上的字。");
@@ -123,16 +123,11 @@
     function begin() {
       if (mine !== token) return;
       try {
-        if (synth.speaking || synth.pending) {
-          synth.cancel();
-          root.setTimeout(start, 80);
-        } else {
-          start();
-        }
-      } catch (err) {
-        setStatus("暫時未能朗讀，請讀畫面上的字。");
-        if (hooks.onend) hooks.onend();
-      }
+        synth.cancel();
+      } catch (err) { /* ignore */ }
+      root.setTimeout(function () {
+        if (mine === token) start();
+      }, 80);
     }
 
     var voices = [];

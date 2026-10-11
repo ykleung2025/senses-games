@@ -12,7 +12,7 @@
   var endDialog = document.getElementById("end-dialog");
   var endTimer = null;
   var drag = null;
-  var ignoreClick = false;
+  var swallowClick = null;
 
   var state = {
     matched: new Set(),
@@ -211,14 +211,21 @@
     render();
   }
 
-  function armIgnoreClick() {
-    ignoreClick = true;
-    window.setTimeout(function () { ignoreClick = false; }, 800);
+  function armIgnoreClick(x, y, organId) {
+    swallowClick = { x: x, y: y, organId: organId, until: Date.now() + 700 };
   }
 
   document.addEventListener("click", function (e) {
-    if (!ignoreClick) return;
-    ignoreClick = false;
+    if (!swallowClick) return;
+    if (Date.now() > swallowClick.until) {
+      swallowClick = null;
+      return;
+    }
+    var near = Math.hypot(e.clientX - swallowClick.x, e.clientY - swallowClick.y) < 64;
+    var organ = e.target && e.target.closest ? e.target.closest("[data-organ]") : null;
+    var sameOrgan = organ && organ.dataset.organ === swallowClick.organId;
+    if (!near && !sameOrgan) return;
+    swallowClick = null;
     e.preventDefault();
     e.stopPropagation();
   }, true);
@@ -371,7 +378,7 @@
     var target = moved ? (dropTarget(x, y) || info.hot) : null;
     endDrag();
     if (!moved) return;
-    armIgnoreClick();
+    armIgnoreClick(x, y, info.id);
     if (!target) return;
     if (target.dataset.fn) tryPair(info.id, target.dataset.fn);
     else tryPair(info.id, "not-sense");
@@ -380,8 +387,11 @@
   function cancelDrag() {
     if (!drag) return;
     var moved = drag.moved;
+    var x = drag.lastX;
+    var y = drag.lastY;
+    var id = drag.id;
     endDrag();
-    if (moved) armIgnoreClick();
+    if (moved) armIgnoreClick(x, y, id);
   }
 
   document.addEventListener("pointerdown", function (e) {
@@ -413,6 +423,7 @@
   document.addEventListener("pointerup", function (e) {
     if (!drag) return;
     if (drag.pointerId != null && e.pointerId !== drag.pointerId) return;
+    if (drag.moved && e.cancelable) e.preventDefault();
     finishDrag(e.clientX, e.clientY);
   });
 
@@ -464,6 +475,7 @@
     if (!drag) return;
     var touch = trackedTouch(e);
     if (!touch && drag.touchId != null) return;
+    if (drag.moved && e.cancelable) e.preventDefault();
     var point = touch || { clientX: drag.lastX, clientY: drag.lastY };
     finishDrag(point.clientX, point.clientY);
   });
