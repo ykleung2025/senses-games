@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>感官配對｜樂華天主教小學</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">跳到遊戲</a>
+  <div class="stripe" aria-hidden="true"></div>
+  <header class="page-head">
+    <div class="wrap head-row">
+      <a class="back" href="index.html">所有遊戲</a>
+      <p class="school">樂華天主教小學 · 第1堂</p>
+    </div>
+    <div class="wrap">
+      <h1>感官配對</h1>
+      <p class="lede">點一個器官，再點它的功能。也可以拖過去。五樣是感覺器官，有一樣不是。</p>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <div class="hud">
+      <p class="score" id="score">得分 0／5</p>
+      <div id="dots" class="dots" aria-hidden="true"></div>
+      <button type="button" id="restart" class="text-btn">重新開始</button>
+      <button type="button" id="show-end" class="text-btn" hidden>查看成績</button>
+    </div>
+    <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+    <div id="lesson" class="lesson" role="status" aria-live="polite"></div>
+    <p id="coach" class="coach" role="status"></p>
+    <ul id="paired" class="paired"></ul>
+    <div id="board" class="board"></div>
+    <noscript><p class="lesson">請開啟瀏覽器的 JavaScript，遊戲才可以玩。</p></noscript>
+  </main>
+  <footer class="footer">樂華天主教小學 · 眼、耳、鼻、舌、皮膚</footer>
+  <dialog id="end-dialog" aria-labelledby="end-title">
+    <p class="kicker">本輪完成</p>
+    <h2 id="end-title">做得好！</h2>
+    <p class="score-big">得分 <span id="end-score">0</span>／5</p>
+    <ul id="end-list" class="end-list"></ul>
+    <p id="end-trap" class="end-trap"></p>
+    <div class="end-actions">
+      <button type="button" id="replay" class="primary">再玩一次</button>
+      <a class="secondary" href="index.html">返回首頁</a>
+    </div>
+  </dialog>
+  <script src="js/data.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/match.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>情境選感官｜樂華天主教小學</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">跳到遊戲</a>
+  <div class="stripe" aria-hidden="true"></div>
+  <header class="page-head">
+    <div class="wrap head-row">
+      <a class="back" href="index.html">所有遊戲</a>
+      <p class="school">樂華天主教小學 · 第2堂</p>
+    </div>
+    <div class="wrap">
+      <h1>情境選感官</h1>
+      <p class="lede">先看情境，選用了哪些感覺器官，再選它們的作用。</p>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <div class="hud">
+      <p class="score" id="progress">第 1／10 題</p>
+      <p class="score" id="star-text">星星 0／10</p>
+      <div id="star-row" class="star-row" aria-hidden="true"></div>
+      <div class="bar" aria-hidden="true"><span id="bar-fill"></span></div>
+      <button type="button" id="restart" class="text-btn">重新開始</button>
+    </div>
+    <article id="scene-card" class="scene-card">
+      <h2 id="q-title">走廊轉角</h2>
+      <div id="scene" class="scene"></div>
+      <p id="q-text" class="q-text"></p>
+    </article>
+    <section id="step-box">
+      <h2 id="step-title">用了哪些感覺器官？</h2>
+      <p id="step-note" class="step-note">可以選多個。</p>
+      <div id="choices" class="choices"></div>
+      <div id="explain" class="explain" hidden></div>
+    </section>
+    <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+    <div class="action-bar">
+      <button type="button" id="back-step" class="secondary" hidden>返回</button>
+      <button type="button" id="submit" class="primary">選好了</button>
+    </div>
+    <noscript><p class="lesson">請開啟瀏覽器的 JavaScript，遊戲才可以玩。</p></noscript>
+  </main>
+  <footer class="footer">樂華天主教小學 · 保障安全 · 解決生活問題 · 認識事物的特性</footer>
+  <dialog id="end-dialog" aria-labelledby="end-title">
+    <p class="kicker">十個情境都完成了</p>
+    <div class="end-star" id="end-star"></div>
+    <h2 id="end-title">做得好！</h2>
+    <p class="score-big">星星 <span id="end-stars">0</span>／10</p>
+    <p>一次就答對 <span id="end-first">0</span> 題</p>
+    <ul class="end-list">
+      <li>保障安全：例如走廊聽見急腳步聲，要停低。</li>
+      <li>解決生活問題：例如飯堂看號碼牌、聽廣播才入座。</li>
+      <li>認識事物的特性：例如摸紙，分辨粗糙還是光滑。</li>
+    </ul>
+    <div class="end-actions">
+      <button type="button" id="replay" class="primary">再玩一次</button>
+      <a class="secondary" href="index.html">返回首頁</a>
+    </div>
+  </dialog>
+  <script src="js/data.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/scenes.js"></script>
+  <script src="js/scenario.js"></script>
+</body>
+</html>

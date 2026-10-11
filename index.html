@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>感覺器官小遊戲｜樂華天主教小學</title>
+  <meta name="description" content="樂華天主教小學科學課：感官配對、情境選感官。">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">跳到遊戲</a>
+  <div class="stripe" aria-hidden="true"></div>
+  <header class="hero">
+    <div class="wrap">
+      <p class="school">樂華天主教小學 · 科學</p>
+      <h1>感覺器官多重要</h1>
+      <p class="lede">兩個小遊戲，給小一、小二。不用登入，點一點就可以玩。手機和平板都可以。</p>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <div class="cards">
+      <a class="game-card" href="match.html">
+        <p class="tag">第1堂 · 堂上示範＋回家玩</p>
+        <div class="card-art" id="art-match"></div>
+        <h2>感官配對</h2>
+        <p>把眼睛、耳朵、鼻子、舌頭和皮膚，配對它們的功能。</p>
+        <span class="go">開始玩</span>
+      </a>
+      <a class="game-card" href="scenario.html">
+        <p class="tag">第2堂 · 堂上示範＋回家玩</p>
+        <div class="card-art" id="art-scenario"></div>
+        <h2>情境選感官</h2>
+        <p>看一個生活情境，選用了哪些感覺器官，再選它們的作用。</p>
+        <span class="go">開始玩</span>
+      </a>
+    </div>
+    <section class="note">
+      <h2>怎樣玩</h2>
+      <ul>
+        <li>可以用手指點，也可以拖一拖。</li>
+        <li>按鈕很大，適合小一、小二。</li>
+        <li>玩完可以再玩一次。</li>
+      </ul>
+    </section>
+    <details class="teacher">
+      <summary>老師用：三分鐘示範</summary>
+      <div class="script">
+        <p><strong>0:00 首頁。</strong>說：「今日看感覺器官有多重要。我們有兩個遊戲。」指一指「感官配對」和「情境選感官」。先開第一個。</p>
+        <p><strong>0:30 感官配對。</strong>點「眼睛」，再點「看東西、辨顏色」，請同學讀「答對了」。再配「皮膚」和「感覺冷熱、軟硬等」。然後點「牙齒」，再按「這不是感覺器官」（或把牙齒拖到功能上）。一起讀：「牙齒很有用，但不是感覺器官哦！」小結：感覺器官有五種——眼、耳、鼻、舌、皮膚。</p>
+        <p><strong>1:50 情境選感官。</strong>回到首頁，打開第二個遊戲。第1題「走廊轉角」：點「耳朵」（可加「眼睛」），按「選好了」；再點「保障安全」。一起讀解釋和星星。小結：感覺器官可以保障安全、解決生活問題、認識事物的特性。其餘題目可以回家玩。</p>
+      </div>
+    </details>
+    <noscript><p class="lesson">請開啟瀏覽器的 JavaScript，遊戲才可以玩。</p></noscript>
+  </main>
+  <footer class="footer">樂華天主教小學 · 科學 · 感覺器官</footer>
+  <script src="js/icons.js"></script>
+  <script>
+    (function () {
+      var icons = globalThis.SenseIcons;
+      function fill(id, names) {
+        var row = document.getElementById(id);
+        names.forEach(function (name) {
+          var span = document.createElement("span");
+          span.className = "icon";
+          span.innerHTML = icons.icon(name);
+          row.appendChild(span);
+        });
+      }
+      fill("art-match", ["eye", "ear", "nose", "tongue", "skin"]);
+      fill("art-scenario", ["shield", "bulb", "search"]);
+    })();
+  </script>
+</body>
+</html>
