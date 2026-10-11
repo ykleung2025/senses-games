@@ -318,8 +318,39 @@
     if (endDialog.open) endDialog.close();
   });
 
-  document.getElementById("restart").addEventListener("click", reset);
-  document.getElementById("replay").addEventListener("click", reset);
+  function speechText() {
+    if (endDialog.open) {
+      var summary = ["做得好！得分 " + state.matched.size + "／5。"];
+      lab.PAIRS.forEach(function (pair) {
+        summary.push(pair.name + "：" + pair.fn + "。");
+      });
+      summary.push(lab.TRAP.message);
+      return summary.join("");
+    }
+    var parts = [];
+    if (state.feedback && state.feedback.text) parts.push(state.feedback.text);
+    if (state.trapFound) parts.push(lab.TRAP.message);
+    if (state.matched.size === 5 && !state.trapFound) {
+      parts.push("五種感覺器官都配對了！再點「牙齒」，然後按「這不是感覺器官」。");
+    }
+    parts.push("器官：" + state.organs.map(function (id) {
+      return lab.organById(id).name;
+    }).join("、") + "。");
+    parts.push("功能：" + state.functions.map(function (id) {
+      return lab.functionText(id);
+    }).join("、") + "。");
+    return parts.join("");
+  }
+
+  var speaker = globalThis.SenseSpeech.bindButtons(speechText);
+
+  function resetAndQuiet() {
+    speaker.stop();
+    reset();
+  }
+
+  document.getElementById("restart").addEventListener("click", resetAndQuiet);
+  document.getElementById("replay").addEventListener("click", resetAndQuiet);
   showEnd.addEventListener("click", openEnd);
 
   reset();

@@ -145,8 +145,7 @@ h2 { font-size: 1.25rem; margin: 0 0 8px; }
 .game-card:focus-visible,
 button:focus-visible,
 .back:focus-visible,
-.secondary:focus-visible,
-summary:focus-visible {
+.secondary:focus-visible {
   outline: 3px solid var(--teal);
   outline-offset: 3px;
 }
@@ -189,30 +188,15 @@ summary:focus-visible {
   align-self: flex-start;
 }
 
-.note, .teacher {
+.note {
   margin-top: 22px;
   background: var(--card);
   border-radius: 20px;
   padding: 14px 16px 16px;
+  border: 2px solid var(--line);
 }
-
-.note { border: 2px solid var(--line); }
 
 .note ul { margin: 8px 0 0; padding-left: 1.2em; }
-
-.teacher {
-  border: 2px dashed #d9cbb3;
-}
-
-.teacher summary {
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.teacher p, .script p { margin: 0.4em 0; }
 
 .footer {
   text-align: center;
@@ -250,15 +234,39 @@ summary:focus-visible {
   border-style: solid;
 }
 
-.text-btn {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 8px 14px;
+.text-btn, .speak-btn {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 8px 16px;
   border-radius: 999px;
-  border: 2px solid var(--line);
-  background: #fff;
   font-weight: 700;
 }
+
+.text-btn {
+  border: 2px solid var(--line);
+  background: #fff;
+}
+
+.speak-btn {
+  border: 3px solid var(--teal-deep);
+  background: #e5f7f2;
+  color: var(--teal-deep);
+  box-shadow: 0 3px 0 var(--teal-deep);
+}
+
+.speak-btn.is-speaking {
+  background: var(--teal);
+  color: #fff;
+}
+
+.speak-status {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--bad-ink);
+  font-weight: 700;
+}
+
+.speak-status:empty { display: none; }
 
 .primary, .secondary {
   display: inline-flex;
@@ -284,7 +292,7 @@ summary:focus-visible {
   border-color: var(--teal);
 }
 
-.primary:active, .secondary:active, .text-btn:active, .choice:active, .fn:active, .organ:active {
+.primary:active, .secondary:active, .text-btn:active, .speak-btn:active, .choice:active, .fn:active, .organ:active {
   transform: translateY(2px);
 }
 
@@ -410,9 +418,27 @@ summary:focus-visible {
   overflow: visible;
 }
 
-.card-art .icon, .card-art .icon svg {
-  width: 52px;
-  height: 52px;
+.icon img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  background: #fff;
+}
+
+.organ .icon {
+  width: min(100%, 120px);
+  height: 88px;
+  padding: 2px;
+  overflow: visible;
+}
+
+.card-art .icon, .card-art .icon svg, .card-art .icon img {
+  width: 72px;
+  height: 64px;
 }
 
 .fns { display: flex; flex-direction: column; gap: 10px; }
@@ -493,6 +519,30 @@ body.is-dragging .drop-hot {
   overflow: visible;
 }
 
+.scene-photo {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  border-radius: 16px;
+  background: #fff8ee;
+}
+
+.scene-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.scene-head h2 { margin: 0; }
+.scene-head .speak-btn { flex: none; }
+
 .q-text {
   font-size: 1.15rem;
   margin: 12px 0 0;
@@ -546,7 +596,7 @@ body.is-dragging .drop-hot {
 
 .choice .name { font-weight: 700; font-size: 1.08rem; }
 
-.choice .icon, .choice .icon svg { width: 40px; height: 40px; }
+.choice .icon, .choice .icon svg, .choice .icon img { width: 56px; height: 56px; }
 
 .explain {
   display: flex;
@@ -677,8 +727,8 @@ dialog h2 { font-size: 1.55rem; }
   .board { grid-template-columns: 1fr 1fr; align-items: start; }
   .not-sense { grid-column: 1 / -1; }
   .organs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .organ { min-height: 118px; }
-  .organ .icon svg { width: 56px; height: 56px; }
+  .organ { min-height: 148px; }
+  .organ .icon { width: min(100%, 150px); height: 112px; }
   .fn { min-height: 64px; font-size: 1.08rem; }
 }
 

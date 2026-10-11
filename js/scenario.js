@@ -143,6 +143,7 @@
   }
 
   function submitAnswer() {
+    speaker.stop();
     var q = current();
     if (state.step === 3) {
       goNext();
@@ -178,7 +179,34 @@
     render();
   }
 
+  function speechText() {
+    if (endDialog.open) {
+      var done = ["十個情境都完成了。", "星星 " + state.stars + "／10。", "一次就答對 " + state.firstTry + " 題。"];
+      endDialog.querySelectorAll(".end-list li").forEach(function (li) {
+        done.push(li.textContent);
+      });
+      return done.join("");
+    }
+    var q = current();
+    var parts = [q.title + "。" + q.text];
+    if (state.step === 1) {
+      parts.push("用了哪些感覺器官？可以選多個。");
+    } else if (state.step === 2) {
+      parts.push("這些感覺主要有什麼作用？可以選多個。");
+    } else {
+      parts.push("你選了：" + orderedNames(state.sensePick, lab.SENSES).join("、") + "。");
+      parts.push(q.explain);
+    }
+    var items = state.step === 1 ? lab.SENSES : lab.PURPOSES;
+    parts.push(items.map(function (item) { return item.name; }).join("、") + "。");
+    if (feedback.textContent) parts.push(feedback.textContent);
+    return parts.join("");
+  }
+
+  var speaker = globalThis.SenseSpeech.bindButtons(speechText);
+
   function goNext() {
+    speaker.stop();
     if (state.index + 1 >= questions.length) {
       state.done = true;
       fillEnd();
@@ -205,6 +233,7 @@
     state.step = 1;
     state.selected = new Set(state.sensePick);
     clearFeedback();
+    speaker.stop();
     render();
   }
 
@@ -224,6 +253,7 @@
     state.clean = true;
     state.done = false;
     clearFeedback();
+    speaker.stop();
     if (endDialog.open) endDialog.close();
     render();
     window.scrollTo(0, 0);
