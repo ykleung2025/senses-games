@@ -1,5 +1,5 @@
 (function () {
-  var CACHE = "3";
+  var CACHE = "4";
 
   var photos = {
     eye: { src: "assets/organs/eye.png", alt: "眼睛" },
