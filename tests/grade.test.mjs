@@ -211,7 +211,7 @@ vm.createContext(speechBox);
 vm.runInContext(fs.readFileSync(path.join(root, "js/speech.js"), "utf8"), speechBox, { filename: "js/speech.js" });
 speechBox.SenseSpeech.speak("眼睛");
 speechBox.SenseSpeech.speak("耳朵");
-assert(synth.cancels === 1, "new 朗讀 stops the previous utterance");
+assert(synth.cancels === 2, "each 朗讀 cancels before it speaks");
 assert(synth.spoken.map((item) => item.text).join(",") === "眼睛,耳朵", "speaks each option");
 assert(synth.spoken.every((item) => item.voice === "zh-HK" && item.lang === "zh-HK"), "uses zh-HK voice");
 assert(speechJs.includes("bindOptionSpeakers"), "per option speakers");
