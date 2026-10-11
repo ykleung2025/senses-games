@@ -72,11 +72,14 @@
       if (id !== "tooth" && locked) extra = '<span class="done-mark">已配對</span>';
       if (id === "tooth" && state.trapFound) extra = '<span class="done-mark">不是感覺器官</span>';
       return (
+        '<div class="option-row">' +
         '<button type="button" class="' + cls + '" data-organ="' + id + '" data-locked="' + locked + '" aria-pressed="' + selected + '" aria-label="' + aria + '">' +
-        '<span class="icon">' + icons.icon(id === "tooth" ? "tooth" : id) + "</span>" +
+        '<span class="icon">' + icons.icon(id) + "</span>" +
         '<span class="label">' + meta.name + "</span>" +
         extra +
-        "</button>"
+        "</button>" +
+        speakButton(meta.name) +
+        "</div>"
       );
     }).join("");
 
@@ -87,10 +90,13 @@
       if (id !== "chew" && state.matched.has(id)) owner = '<span class="owner">' + lab.organById(id).name + "</span>";
       if (id === "chew" && state.trapFound) owner = '<span class="owner">不是感覺功能</span>';
       return (
+        '<div class="option-row">' +
         '<button type="button" class="fn' + (locked ? " is-done" : "") + '" data-fn="' + id + '" data-locked="' + locked + '">' +
         '<span class="label">' + text + "</span>" +
         owner +
-        "</button>"
+        "</button>" +
+        speakButton(text) +
+        "</div>"
       );
     }).join("");
 
@@ -125,6 +131,16 @@
       var el = board.querySelector(restore);
       if (el) el.focus();
     }
+    if (globalThis.SenseSpeech) globalThis.SenseSpeech.syncOptionButtons();
+  }
+
+  function speakButton(text) {
+    var safe = String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    return '<button type="button" class="speak-btn speak-mini js-option-speak" data-speak="' + safe + '" aria-label="朗讀：' + safe + '">朗讀</button>';
   }
 
   function maybeComplete() {
@@ -237,6 +253,7 @@
 
   document.addEventListener("pointerdown", function (e) {
     if (drag || e.button !== 0) return;
+    if (e.target.closest(".js-option-speak")) return;
     var organ = e.target.closest("[data-organ]");
     if (!organ || !board.contains(organ)) return;
     if (organ.dataset.locked === "true") return;
@@ -318,31 +335,7 @@
     if (endDialog.open) endDialog.close();
   });
 
-  function speechText() {
-    if (endDialog.open) {
-      var summary = ["做得好！得分 " + state.matched.size + "／5。"];
-      lab.PAIRS.forEach(function (pair) {
-        summary.push(pair.name + "：" + pair.fn + "。");
-      });
-      summary.push(lab.TRAP.message);
-      return summary.join("");
-    }
-    var parts = [];
-    if (state.feedback && state.feedback.text) parts.push(state.feedback.text);
-    if (state.trapFound) parts.push(lab.TRAP.message);
-    if (state.matched.size === 5 && !state.trapFound) {
-      parts.push("五種感覺器官都配對了！再點「牙齒」，然後按「這不是感覺器官」。");
-    }
-    parts.push("器官：" + state.organs.map(function (id) {
-      return lab.organById(id).name;
-    }).join("、") + "。");
-    parts.push("功能：" + state.functions.map(function (id) {
-      return lab.functionText(id);
-    }).join("、") + "。");
-    return parts.join("");
-  }
-
-  var speaker = globalThis.SenseSpeech.bindButtons(speechText);
+  var speaker = globalThis.SenseSpeech.bindOptionSpeakers();
 
   function resetAndQuiet() {
     speaker.stop();

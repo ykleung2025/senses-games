@@ -1,13 +1,13 @@
 (function () {
-  var CACHE = "2";
+  var CACHE = "3";
 
   var photos = {
-    eye: { src: "assets/organs/eye.webp", alt: "眼睛" },
-    ear: { src: "assets/organs/ear.webp", alt: "耳朵" },
-    nose: { src: "assets/organs/nose.webp", alt: "鼻子" },
-    tongue: { src: "assets/organs/tongue.webp", alt: "舌頭" },
-    skin: { src: "assets/organs/skin.webp", alt: "皮膚" },
-    tooth: { src: "assets/organs/tooth.webp", alt: "牙齒" }
+    eye: { src: "assets/organs/eye.png", alt: "眼睛" },
+    ear: { src: "assets/organs/ear.png", alt: "耳朵" },
+    nose: { src: "assets/organs/nose.png", alt: "鼻子" },
+    tongue: { src: "assets/organs/tongue.png", alt: "舌頭" },
+    skin: { src: "assets/organs/skin.png", alt: "皮膚" },
+    tooth: { src: "assets/organs/tooth.png", alt: "牙齒" }
   };
 
   function svg(body) {

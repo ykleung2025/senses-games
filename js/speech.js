@@ -162,47 +162,55 @@
     }, 250);
   }
 
-  function bindButtons(getText) {
+  var speakingKey = "";
+
+  function syncOptionButtons() {
+    if (typeof document === "undefined") return;
+    var nodes = document.querySelectorAll(".js-option-speak");
+    Array.prototype.forEach.call(nodes, function (btn) {
+      var on = !!speakingKey && btn.getAttribute("data-speak") === speakingKey;
+      btn.textContent = on ? "停止" : "朗讀";
+      btn.classList.toggle("is-speaking", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  function quiet() {
+    speakingKey = "";
+    stop();
+    syncOptionButtons();
+  }
+
+  function bindOptionSpeakers() {
     if (typeof document === "undefined") return { stop: function () {} };
-    var buttons = Array.prototype.slice.call(document.querySelectorAll(".js-speak"));
     bindStatus(document.getElementById("speak-status"));
 
-    function setSpeaking(on) {
-      buttons.forEach(function (btn) {
-        btn.textContent = on ? "停止" : "朗讀";
-        btn.classList.toggle("is-speaking", on);
-        btn.setAttribute("aria-pressed", on ? "true" : "false");
-      });
-    }
-
-    buttons.forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        if (btn.classList.contains("is-speaking")) {
-          stop();
-          setSpeaking(false);
-          return;
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest(".js-option-speak");
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (btn.classList.contains("is-speaking")) {
+        quiet();
+        return;
+      }
+      var text = btn.getAttribute("data-speak") || "";
+      speakingKey = text;
+      syncOptionButtons();
+      speak(text, {
+        onstart: function () { syncOptionButtons(); },
+        onend: function () {
+          if (speakingKey === text) speakingKey = "";
+          syncOptionButtons();
         }
-        setSpeaking(true);
-        speak(getText(), {
-          onstart: function () { setSpeaking(true); },
-          onend: function () { setSpeaking(false); }
-        });
       });
-    });
+    }, true);
 
     if (typeof root.addEventListener === "function") {
-      root.addEventListener("pagehide", function () {
-        stop();
-        setSpeaking(false);
-      });
+      root.addEventListener("pagehide", quiet);
     }
 
-    return {
-      stop: function () {
-        stop();
-        setSpeaking(false);
-      }
-    };
+    return { stop: quiet, sync: syncOptionButtons };
   }
 
   if (supported()) {
@@ -218,7 +226,8 @@
     stop: stop,
     pickVoice: pickVoice,
     scoreVoice: scoreVoice,
-    bindButtons: bindButtons,
+    bindOptionSpeakers: bindOptionSpeakers,
+    syncOptionButtons: syncOptionButtons,
     bindStatus: bindStatus
   };
 })();
