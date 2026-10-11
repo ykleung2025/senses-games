@@ -211,8 +211,14 @@
     render();
   }
 
+  function armIgnoreClick() {
+    ignoreClick = true;
+    window.setTimeout(function () { ignoreClick = false; }, 800);
+  }
+
   document.addEventListener("click", function (e) {
     if (!ignoreClick) return;
+    ignoreClick = false;
     e.preventDefault();
     e.stopPropagation();
   }, true);
@@ -246,72 +252,231 @@
 
   function endDrag() {
     if (drag && drag.ghost) drag.ghost.remove();
+    if (drag && drag.origin) drag.origin.classList.remove("is-source");
     drag = null;
     document.body.classList.remove("is-dragging");
     document.querySelectorAll(".drop-hot").forEach(function (n) { n.classList.remove("drop-hot"); });
   }
 
-  document.addEventListener("pointerdown", function (e) {
-    if (drag || e.button !== 0) return;
-    if (e.target.closest(".js-option-speak")) return;
-    var organ = e.target.closest("[data-organ]");
-    if (!organ || !board.contains(organ)) return;
-    if (organ.dataset.locked === "true") return;
-    drag = {
-      id: organ.dataset.organ,
-      pointerId: e.pointerId,
-      startX: e.clientX,
-      startY: e.clientY,
-      origin: organ,
-      ghost: null,
-      moved: false
-    };
-    try { organ.setPointerCapture(e.pointerId); } catch (err) { /* older browsers */ }
-  });
+  function hitTarget(x, y) {
+    var stack = [];
+    if (typeof document.elementsFromPoint === "function") {
+      stack = document.elementsFromPoint(x, y) || [];
+    } else {
+      var one = document.elementFromPoint(x, y);
+      if (one) stack = [one];
+    }
+    var i;
+    var node;
+    var zone;
+    for (i = 0; i < stack.length; i += 1) {
+      node = stack[i];
+      if (!node || !node.closest) continue;
+      if (node.closest(".ghost")) continue;
+      if (drag && drag.origin && (node === drag.origin || node.closest("[data-organ]") === drag.origin)) continue;
+      zone = node.closest("[data-fn], [data-drop='not-sense']");
+      if (zone && board.contains(zone)) return zone;
+    }
+    return null;
+  }
 
-  document.addEventListener("pointermove", function (e) {
-    if (!drag || e.pointerId !== drag.pointerId) return;
-    var dist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
-    if (dist < 12) return;
-    drag.moved = true;
-    document.body.classList.add("is-dragging");
+  function dropTarget(x, y) {
+    var direct = hitTarget(x, y);
+    if (direct) return direct;
+    var nodes = board.querySelectorAll("[data-fn], [data-drop='not-sense']");
+    var best = null;
+    var bestDist = 36;
+    Array.prototype.forEach.call(nodes, function (el) {
+      var rect = el.getBoundingClientRect();
+      var cx = Math.max(rect.left, Math.min(x, rect.right));
+      var cy = Math.max(rect.top, Math.min(y, rect.bottom));
+      var dist = Math.hypot(x - cx, y - cy);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = el;
+      }
+    });
+    return best;
+  }
+
+  function paintHot(target) {
+    document.querySelectorAll(".drop-hot").forEach(function (n) { n.classList.remove("drop-hot"); });
+    if (target) target.classList.add("drop-hot");
+  }
+
+  function updateDrag(x, y) {
+    if (!drag) return;
+    drag.lastX = x;
+    drag.lastY = y;
+    var dist = Math.hypot(x - drag.startX, y - drag.startY);
+    var slop = drag.pointerType === "touch" ? 18 : 10;
+    if (!drag.moved) {
+      if (dist < slop) return;
+      drag.moved = true;
+      document.body.classList.add("is-dragging");
+      drag.origin.classList.add("is-source");
+    }
     if (!drag.ghost) {
       drag.ghost = drag.origin.cloneNode(true);
       drag.ghost.classList.add("ghost");
+      drag.ghost.classList.remove("is-source");
+      drag.ghost.style.pointerEvents = "none";
+      drag.ghost.setAttribute("aria-hidden", "true");
+      drag.ghost.tabIndex = -1;
       var rect = drag.origin.getBoundingClientRect();
       drag.ghost.style.width = rect.width + "px";
       drag.ghost.style.height = rect.height + "px";
       document.body.appendChild(drag.ghost);
     }
-    drag.ghost.style.left = e.clientX + "px";
-    drag.ghost.style.top = e.clientY + "px";
-    var under = document.elementFromPoint(e.clientX, e.clientY);
-    document.querySelectorAll(".drop-hot").forEach(function (n) { n.classList.remove("drop-hot"); });
-    var target = under && under.closest("[data-fn], [data-drop='not-sense']");
-    if (target) target.classList.add("drop-hot");
-  });
+    drag.ghost.style.left = x + "px";
+    drag.ghost.style.top = y + "px";
+    var target = dropTarget(x, y);
+    drag.hot = target;
+    paintHot(target);
+  }
 
-  document.addEventListener("pointerup", function (e) {
-    if (!drag || e.pointerId !== drag.pointerId) return;
+  function startDrag(organ, x, y, extra) {
+    drag = {
+      id: organ.dataset.organ,
+      origin: organ,
+      startX: x,
+      startY: y,
+      lastX: x,
+      lastY: y,
+      ghost: null,
+      moved: false,
+      hot: null,
+      pointerId: extra.pointerId != null ? extra.pointerId : null,
+      touchId: extra.touchId != null ? extra.touchId : null,
+      pointerType: extra.pointerType || "mouse",
+      pointerGone: false
+    };
+  }
+
+  function organFromEvent(e) {
+    if (e.target && e.target.closest && e.target.closest(".js-option-speak")) return null;
+    var node = e.target && e.target.closest ? e.target.closest("[data-organ]") : null;
+    if (node && board.contains(node)) return node;
+    return null;
+  }
+
+  function finishDrag(x, y) {
+    if (!drag) return;
     var info = drag;
-    var under = document.elementFromPoint(e.clientX, e.clientY);
+    if (x == null || y == null) {
+      x = info.lastX;
+      y = info.lastY;
+    }
     var moved = info.moved;
+    var target = moved ? (dropTarget(x, y) || info.hot) : null;
     endDrag();
     if (!moved) return;
-    var target = under && under.closest("[data-fn], [data-drop='not-sense']");
-    ignoreClick = true;
-    window.setTimeout(function () { ignoreClick = false; }, 0);
+    armIgnoreClick();
     if (!target) return;
     if (target.dataset.fn) tryPair(info.id, target.dataset.fn);
     else tryPair(info.id, "not-sense");
+  }
+
+  function cancelDrag() {
+    if (!drag) return;
+    var moved = drag.moved;
+    endDrag();
+    if (moved) armIgnoreClick();
+  }
+
+  document.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0) return;
+    var organ = organFromEvent(e);
+    if (!organ || organ.dataset.locked === "true") return;
+    if (drag && drag.origin === organ && !drag.pointerGone) {
+      drag.pointerId = e.pointerId;
+      return;
+    }
+    if (drag && !drag.pointerGone) return;
+    if (drag) endDrag();
+    startDrag(organ, e.clientX, e.clientY, {
+      pointerId: e.pointerId,
+      pointerType: e.pointerType || "mouse"
+    });
+    if (e.pointerType !== "touch") {
+      try { organ.setPointerCapture(e.pointerId); } catch (err) { /* mouse only */ }
+    }
+  });
+
+  document.addEventListener("pointermove", function (e) {
+    if (!drag) return;
+    if (drag.pointerId != null && e.pointerId !== drag.pointerId) return;
+    if (e.cancelable) e.preventDefault();
+    updateDrag(e.clientX, e.clientY);
+  }, { passive: false });
+
+  document.addEventListener("pointerup", function (e) {
+    if (!drag) return;
+    if (drag.pointerId != null && e.pointerId !== drag.pointerId) return;
+    finishDrag(e.clientX, e.clientY);
   });
 
   document.addEventListener("pointercancel", function (e) {
-    if (!drag || e.pointerId !== drag.pointerId) return;
-    endDrag();
+    if (!drag) return;
+    if (drag.pointerId != null && e.pointerId !== drag.pointerId) return;
+    if (drag.pointerType === "touch" || drag.touchId != null) {
+      drag.pointerGone = true;
+      return;
+    }
+    cancelDrag();
+  });
+
+  document.addEventListener("touchstart", function (e) {
+    var touch = e.changedTouches && e.changedTouches[0];
+    if (!touch) return;
+    var organ = organFromEvent(e);
+    if (drag) {
+      if (organ && organ === drag.origin && drag.touchId == null) drag.touchId = touch.identifier;
+      return;
+    }
+    if (!organ || organ.dataset.locked === "true") return;
+    startDrag(organ, touch.clientX, touch.clientY, {
+      touchId: touch.identifier,
+      pointerType: "touch"
+    });
+  }, { passive: true });
+
+  function trackedTouch(e) {
+    var list = e.touches && e.touches.length ? e.touches : e.changedTouches;
+    if (!list || !list.length) return null;
+    if (!drag || drag.touchId == null) return list[0];
+    var i;
+    for (i = 0; i < list.length; i += 1) {
+      if (list[i].identifier === drag.touchId) return list[i];
+    }
+    return null;
+  }
+
+  document.addEventListener("touchmove", function (e) {
+    if (!drag) return;
+    var touch = trackedTouch(e);
+    if (!touch) return;
+    if (e.cancelable) e.preventDefault();
+    updateDrag(touch.clientX, touch.clientY);
+  }, { passive: false });
+
+  document.addEventListener("touchend", function (e) {
+    if (!drag) return;
+    var touch = trackedTouch(e);
+    if (!touch && drag.touchId != null) return;
+    var point = touch || { clientX: drag.lastX, clientY: drag.lastY };
+    finishDrag(point.clientX, point.clientY);
+  });
+
+  document.addEventListener("touchcancel", function (e) {
+    if (!drag) return;
+    var touch = trackedTouch(e);
+    if (!touch && drag.touchId != null) return;
+    cancelDrag();
   });
 
   function reset() {
+    endDrag();
     window.clearTimeout(endTimer);
     endTimer = null;
     state.done = false;

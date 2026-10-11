@@ -169,7 +169,7 @@
     var nodes = document.querySelectorAll(".js-option-speak");
     Array.prototype.forEach.call(nodes, function (btn) {
       var on = !!speakingKey && btn.getAttribute("data-speak") === speakingKey;
-      btn.textContent = on ? "停止" : "朗讀";
+      btn.textContent = on ? "停止" : (btn.getAttribute("data-idle-label") || "朗讀");
       btn.classList.toggle("is-speaking", on);
       btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
@@ -184,7 +184,6 @@
   function bindOptionSpeakers() {
     if (typeof document === "undefined") return { stop: function () {} };
     bindStatus(document.getElementById("speak-status"));
-
     document.addEventListener("click", function (e) {
       var btn = e.target.closest(".js-option-speak");
       if (!btn) return;
