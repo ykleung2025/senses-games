@@ -173,6 +173,39 @@ assert(!scenarioJs.includes("bindButtons"), "scenario does not read the whole pa
 
 const speechJs = fs.readFileSync(path.join(root, "js/speech.js"), "utf8");
 assert(speechJs.includes("synth.cancel"), "stop before new speech");
+
+const speechBox = {
+  setTimeout(fn) { fn(); },
+  addEventListener() {},
+  document: {
+    querySelectorAll() { return []; },
+    getElementById() { return { textContent: "" }; },
+    addEventListener() {}
+  }
+};
+const synth = {
+  speaking: false,
+  pending: false,
+  cancels: 0,
+  spoken: [],
+  getVoices() { return [{ lang: "zh-HK", name: "Cantonese" }]; },
+  cancel() { this.cancels += 1; this.speaking = false; },
+  resume() {},
+  speak(utter) {
+    this.speaking = true;
+    this.spoken.push({ text: utter.text, lang: utter.lang, voice: utter.voice && utter.voice.lang });
+  },
+  addEventListener() {}
+};
+speechBox.speechSynthesis = synth;
+speechBox.SpeechSynthesisUtterance = function (text) { this.text = text; };
+vm.createContext(speechBox);
+vm.runInContext(fs.readFileSync(path.join(root, "js/speech.js"), "utf8"), speechBox, { filename: "js/speech.js" });
+speechBox.SenseSpeech.speak("眼睛");
+speechBox.SenseSpeech.speak("耳朵");
+assert(synth.cancels === 1, "new 朗讀 stops the previous utterance");
+assert(synth.spoken.map((item) => item.text).join(",") === "眼睛,耳朵", "speaks each option");
+assert(synth.spoken.every((item) => item.voice === "zh-HK" && item.lang === "zh-HK"), "uses zh-HK voice");
 assert(speechJs.includes("bindOptionSpeakers"), "per option speakers");
 assert(speechJs.includes('lang === "zh-hk"'), "prefer zh-HK");
 assert(speechJs.includes('lang === "zh-yue"'), "prefer zh-yue");
