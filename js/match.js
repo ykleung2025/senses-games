@@ -10,9 +10,14 @@
   var dots = document.getElementById("dots");
   var showEnd = document.getElementById("show-end");
   var endDialog = document.getElementById("end-dialog");
+  var tipDialog = document.getElementById("tip-dialog");
+  var tipText = document.getElementById("tip-text");
+  var tipSpeak = document.getElementById("tip-speak");
+  var tipClose = document.getElementById("tip-close");
   var endTimer = null;
   var drag = null;
   var swallowClick = null;
+  var speaker = null;
 
   var state = {
     matched: new Set(),
@@ -20,6 +25,7 @@
     selected: null,
     feedback: null,
     done: false,
+    waitEnd: false,
     organs: [],
     functions: []
   };
@@ -87,15 +93,21 @@
       var locked = fnLocked(id);
       var text = lab.functionText(id);
       var owner = "";
+      var spoken = text;
+      var aria = "";
       if (id !== "chew" && state.matched.has(id)) owner = '<span class="owner">' + lab.organById(id).name + "</span>";
-      if (id === "chew" && state.trapFound) owner = '<span class="owner">不是感覺功能</span>';
+      if (id === "chew") {
+        owner = '<span class="fn-hint">不是感覺功能</span>';
+        spoken = text + "。不是感覺功能。";
+        aria = ' aria-label="' + text + '，不是感覺功能"';
+      }
       return (
         '<div class="option-row">' +
-        '<button type="button" class="fn' + (locked ? " is-done" : "") + '" data-fn="' + id + '" data-locked="' + locked + '">' +
+        '<button type="button" class="fn' + (locked ? " is-done" : "") + '" data-fn="' + id + '" data-locked="' + locked + '"' + aria + '>' +
         '<span class="label">' + text + "</span>" +
         owner +
         "</button>" +
-        speakButton(text) +
+        speakButton(spoken) +
         "</div>"
       );
     }).join("");
@@ -147,6 +159,10 @@
     if (state.matched.size === 5 && state.trapFound && !state.done) {
       state.done = true;
       fillEnd();
+      if (dialogOpen(tipDialog)) {
+        state.waitEnd = true;
+        return;
+      }
       endTimer = window.setTimeout(openEnd, 700);
     }
   }
@@ -163,8 +179,41 @@
     document.getElementById("end-trap").textContent = lab.TRAP.message;
   }
 
+  function dialogOpen(el) {
+    return !!(el && (el.open || el.hasAttribute("open")));
+  }
+
+  function modalOpen() {
+    return dialogOpen(tipDialog) || dialogOpen(endDialog);
+  }
+
+  function closeTip() {
+    if (!tipDialog) return;
+    if (typeof tipDialog.close === "function" && tipDialog.open) tipDialog.close();
+    else tipDialog.removeAttribute("open");
+  }
+
+  function showTip(message, dismissLabel, kind) {
+    if (!tipDialog) return;
+    if (speaker) speaker.stop();
+    tipText.textContent = message;
+    tipSpeak.setAttribute("data-speak", message);
+    tipSpeak.setAttribute("aria-label", "朗讀：" + message);
+    tipClose.textContent = dismissLabel || "再試一次";
+    tipDialog.dataset.kind = kind || "retry";
+    if (globalThis.SenseSpeech) globalThis.SenseSpeech.syncOptionButtons();
+    if (typeof tipDialog.showModal === "function") {
+      if (!tipDialog.open) tipDialog.showModal();
+    } else if (!tipDialog.hasAttribute("open")) {
+      tipDialog.setAttribute("open", "");
+    }
+    tipClose.focus();
+  }
+
   function openEnd() {
     if (!state.done) return;
+    state.waitEnd = false;
+    closeTip();
     fillEnd();
     if (typeof endDialog.showModal === "function") {
       if (!endDialog.open) endDialog.showModal();
@@ -181,6 +230,7 @@
       state.selected = organId;
       state.feedback = { kind: "bad", text: "這個已經配對了，選另一個功能。" };
       render();
+      showTip(state.feedback.text, "再試一次", "retry");
       return;
     }
     var result = lab.judgeMatch(organId, targetId);
@@ -188,16 +238,23 @@
       state.matched.add(organId);
       state.selected = null;
       state.feedback = { kind: "good", text: result.message };
-    } else if (result.type === "trap") {
+      render();
+      maybeComplete();
+      return;
+    }
+    if (result.type === "trap") {
       state.trapFound = true;
       state.selected = null;
       state.feedback = null;
-    } else {
-      state.selected = organId;
-      state.feedback = { kind: "bad", text: result.message };
+      render();
+      showTip(result.message, "知道了", "trap");
+      maybeComplete();
+      return;
     }
+    state.selected = organId;
+    state.feedback = { kind: "bad", text: result.message };
     render();
-    maybeComplete();
+    showTip(result.message, "再試一次", "retry");
   }
 
   function onOrganTap(id) {
@@ -231,6 +288,7 @@
   }, true);
 
   board.addEventListener("click", function (e) {
+    if (modalOpen()) return;
     var organBtn = e.target.closest("[data-organ]");
     var fnBtn = e.target.closest("[data-fn]");
     var zone = e.target.closest("[data-drop='not-sense']");
@@ -395,7 +453,7 @@
   }
 
   document.addEventListener("pointerdown", function (e) {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || modalOpen()) return;
     var organ = organFromEvent(e);
     if (!organ || organ.dataset.locked === "true") return;
     if (drag && drag.origin === organ && !drag.pointerGone) {
@@ -438,6 +496,7 @@
   });
 
   document.addEventListener("touchstart", function (e) {
+    if (modalOpen()) return;
     var touch = e.changedTouches && e.changedTouches[0];
     if (!touch) return;
     var organ = organFromEvent(e);
@@ -492,6 +551,7 @@
     window.clearTimeout(endTimer);
     endTimer = null;
     state.done = false;
+    state.waitEnd = false;
     state.matched = new Set();
     state.trapFound = false;
     state.selected = null;
@@ -499,6 +559,7 @@
     state.organs = shuffle(["eye", "ear", "nose", "tongue", "skin", "tooth"]);
     state.functions = shuffle(["eye", "ear", "nose", "tongue", "skin", "chew"]);
     showEnd.hidden = true;
+    closeTip();
     if (endDialog.open) endDialog.close();
     render();
   }
@@ -512,7 +573,22 @@
     if (endDialog.open) endDialog.close();
   });
 
-  var speaker = globalThis.SenseSpeech.bindOptionSpeakers();
+  speaker = globalThis.SenseSpeech.bindOptionSpeakers();
+
+  tipClose.addEventListener("click", function () {
+    closeTip();
+  });
+
+  tipDialog.addEventListener("click", function (e) {
+    if (e.target === tipDialog) closeTip();
+  });
+
+  tipDialog.addEventListener("close", function () {
+    if (speaker) speaker.stop();
+    if (!state.waitEnd) return;
+    state.waitEnd = false;
+    endTimer = window.setTimeout(openEnd, 400);
+  });
 
   function resetAndQuiet() {
     speaker.stop();
