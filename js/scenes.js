@@ -1,5 +1,5 @@
 (function () {
-  var CACHE = "5";
+  var CACHE = "6";
 
   var scenes = {
     1: {

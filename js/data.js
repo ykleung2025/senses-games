@@ -128,21 +128,50 @@
     return organ ? organ.fn : "";
   }
 
+  var SENSE_CLUE = {
+    eye: "想想：我們用眼睛看。",
+    ear: "想想：我們用耳朵聽。",
+    nose: "想想：我們用鼻子聞氣味。",
+    tongue: "想想：我們用舌頭嘗一嘗。",
+    skin: "想想：皮膚可以感到冷和熱。"
+  };
+
+  var FN_JOB = {
+    eye: "看東西",
+    ear: "聽聲音",
+    nose: "聞氣味",
+    tongue: "嘗味道",
+    skin: "感到冷熱"
+  };
+
   function judgeMatch(organId, targetId) {
     if (organId === TRAP.id) {
       return { type: "trap", message: TRAP.message };
     }
+    var organ = organById(organId);
+    var name = organ ? organ.name : "";
     if (targetId === "not-sense") {
-      return { type: "retry", message: "再看看，這個是感覺器官，請配對它的功能。" };
+      return {
+        type: "retry",
+        message: "再看看，" + name + "是感覺器官。請配對它的功能，不要放在「這不是感覺器官」。"
+      };
     }
     if (targetId === "chew") {
-      return { type: "retry", message: "再試一次。咀嚼食物不是感覺功能。" };
+      return {
+        type: "retry",
+        message: "你把" + name + "配了「咀嚼食物」。咀嚼食物不是感覺功能。再為" + name + "選一個感覺功能吧。"
+      };
     }
     if (organId === targetId) {
-      var pair = organById(organId);
-      return { type: "correct", message: pair ? pair.praise : "答對了！" };
+      return { type: "correct", message: organ ? organ.praise : "答對了！" };
     }
-    return { type: "retry", message: "再試一次。" };
+    var fn = functionText(targetId);
+    var job = FN_JOB[targetId] || "這項功能";
+    var clue = SENSE_CLUE[organId] || "再找找這個感覺器官的功能。";
+    return {
+      type: "retry",
+      message: "你把" + name + "配了「" + fn + "」。" + job + "不是" + name + "的工作。" + clue
+    };
   }
 
   function gradeSenses(selected, question) {
