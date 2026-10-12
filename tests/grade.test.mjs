@@ -37,8 +37,12 @@ assert(lab.judgeMatch("tooth", "not-sense").type === "trap", "tooth on zone");
 assert(lab.judgeMatch("eye", "eye").type === "correct", "eye match");
 assert(lab.judgeMatch("skin", "skin").type === "correct", "skin match");
 assert(lab.judgeMatch("eye", "ear").type === "retry", "wrong pair");
+assert(lab.judgeMatch("eye", "ear").message === "再試一次。", "wrong pair tip");
 assert(lab.judgeMatch("eye", "chew").type === "retry", "organ on chew");
+assert(lab.judgeMatch("eye", "chew").message === "再試一次。咀嚼食物不是感覺功能。", "chew retry tip");
 assert(lab.judgeMatch("nose", "not-sense").type === "retry", "organ on zone");
+assert(lab.judgeMatch("nose", "not-sense").message === "再看看，這個是感覺器官，請配對它的功能。", "zone retry tip");
+assert(lab.judgeMatch("tooth", "eye").message === lab.TRAP.message, "trap tip");
 
 const q = Object.fromEntries(lab.QUESTIONS.map((item) => [item.id, item]));
 
@@ -98,14 +102,14 @@ for (const item of lab.QUESTIONS) {
   const picture = icons.scene(item.id);
   const file = sceneFiles[item.id];
   assert(!/object-fit:\s*cover/.test(picture), "scene not cover " + item.id);
-  assert(picture.includes("<img") && picture.includes("assets/scenes/" + file + "?v=4"), "scene " + item.id);
+  assert(picture.includes("<img") && picture.includes("assets/scenes/" + file + "?v=5"), "scene " + item.id);
   assert(picture.includes('class="scene-photo"'), "scene photo class " + item.id);
   assert(fs.existsSync(path.join(root, "assets/scenes/" + file)), "scene file " + item.id);
 }
 
 for (const name of ["eye", "ear", "nose", "tongue", "skin", "tooth"]) {
   const picture = icons.icon(name);
-  assert(picture.includes("<img") && picture.includes("assets/organs/" + name + ".png?v=4"), "emoji " + name);
+  assert(picture.includes("<img") && picture.includes("assets/organs/" + name + ".png?v=5"), "emoji " + name);
   assert(!picture.includes("<svg"), "organ not svg " + name);
   assert(fs.existsSync(path.join(root, "assets/organs/" + name + ".png")), "file " + name);
   assert(!fs.existsSync(path.join(root, "assets/organs/" + name + ".webp")), "webp removed " + name);
@@ -145,19 +149,21 @@ assert(!/object-fit:\s*cover/.test(css), "css does not cover-crop");
 assert(css.includes("object-fit: contain"), "css contains photos");
 assert(!css.includes(".teacher"), "teacher css removed");
 assert(css.includes(".scene-photo"), "scene photo style");
+assert(css.includes(".fn-hint"), "chew hint style");
+assert(css.includes(".tip-dialog"), "tip popup style");
 
 const indexHtml = fs.readFileSync(path.join(root, "index.html"), "utf8");
 assert(!indexHtml.includes("teacher"), "teacher block removed");
 assert(!indexHtml.includes("三分鐘"), "teacher demo removed");
-assert(indexHtml.includes("css/styles.css?v=4"), "index css cache");
-assert(indexHtml.includes("js/icons.js?v=4"), "index js cache");
+assert(indexHtml.includes("css/styles.css?v=5"), "index css cache");
+assert(indexHtml.includes("js/icons.js?v=5"), "index js cache");
 assert(!indexHtml.includes("?v=2"), "index cache bumped");
 
 for (const file of ["match.html", "scenario.html"]) {
   const html = fs.readFileSync(path.join(root, file), "utf8");
   assert(!html.includes("js-speak"), file + " has no page speak button");
-  assert(html.includes("js/speech.js?v=4"), file + " speech script");
-  assert(html.includes("css/styles.css?v=4"), file + " css cache");
+  assert(html.includes("js/speech.js?v=5"), file + " speech script");
+  assert(html.includes("css/styles.css?v=5"), file + " css cache");
   assert(!html.includes("?v=2"), file + " cache bumped");
 }
 
@@ -166,8 +172,18 @@ const scenarioJs = fs.readFileSync(path.join(root, "js/scenario.js"), "utf8");
 const scenarioHtml = fs.readFileSync(path.join(root, "scenario.html"), "utf8");
 assert(matchJs.includes("js-option-speak"), "match option speak");
 assert(matchJs.includes("朗讀"), "match speak label");
+assert(matchJs.includes('id="tip-speak"') || matchJs.includes("tip-speak"), "wrong tip 朗讀");
+assert(matchJs.includes("showTip"), "wrong attempt opens tip");
+assert(matchJs.includes('<span class="fn-hint">不是感覺功能</span>'), "chew hint before pairing");
+assert(!matchJs.includes('id === "chew" && state.trapFound) owner'), "chew hint is not waiting for the trap");
+assert(matchJs.includes("touch-action") || matchJs.includes("touchmove"), "touch drag remains");
 assert(matchJs.includes('icons.icon(id)'), "match uses organ emoji including tooth");
 assert(matchJs.includes("touchmove"), "touch move");
+const matchHtml = fs.readFileSync(path.join(root, "match.html"), "utf8");
+assert(matchHtml.includes('id="tip-dialog"'), "match tip dialog");
+assert(matchHtml.includes('id="tip-speak"'), "match tip 朗讀 button");
+assert(matchHtml.includes(">朗讀<"), "match tip 朗讀 label");
+assert(!matchHtml.includes("?v=4"), "match cache is v5");
 assert(matchJs.includes("touchend"), "touch drop");
 assert(scenarioJs.includes("js-option-speak"), "scenario option speak");
 assert(scenarioJs.includes("朗讀"), "scenario speak label");
