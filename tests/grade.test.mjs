@@ -37,12 +37,39 @@ assert(lab.judgeMatch("tooth", "not-sense").type === "trap", "tooth on zone");
 assert(lab.judgeMatch("eye", "eye").type === "correct", "eye match");
 assert(lab.judgeMatch("skin", "skin").type === "correct", "skin match");
 assert(lab.judgeMatch("eye", "ear").type === "retry", "wrong pair");
-assert(lab.judgeMatch("eye", "ear").message === "再試一次。", "wrong pair tip");
+assert(lab.judgeMatch("eye", "ear").message === "你把眼睛配了「聽聲音、分辨聲音」。聽聲音不是眼睛的工作。想想：我們用眼睛看。", "eye on ear tip");
+assert(lab.judgeMatch("skin", "tongue").message === "你把皮膚配了「嘗味道、分辨味道」。嘗味道不是皮膚的工作。想想：皮膚可以感到冷和熱。", "skin on tongue tip");
 assert(lab.judgeMatch("eye", "chew").type === "retry", "organ on chew");
-assert(lab.judgeMatch("eye", "chew").message === "再試一次。咀嚼食物不是感覺功能。", "chew retry tip");
+assert(lab.judgeMatch("eye", "chew").message === "你把眼睛配了「咀嚼食物」。咀嚼食物不是感覺功能。再為眼睛選一個感覺功能吧。", "chew retry tip");
 assert(lab.judgeMatch("nose", "not-sense").type === "retry", "organ on zone");
-assert(lab.judgeMatch("nose", "not-sense").message === "再看看，這個是感覺器官，請配對它的功能。", "zone retry tip");
+assert(lab.judgeMatch("nose", "not-sense").message === "再看看，鼻子是感覺器官。請配對它的功能，不要放在「這不是感覺器官」。", "zone retry tip");
 assert(lab.judgeMatch("tooth", "eye").message === lab.TRAP.message, "trap tip");
+assert(lab.judgeMatch("eye", "eye").message === "答對了！眼睛用來看東西、辨顏色。", "correct praise unchanged");
+
+const senseIds = ["eye", "ear", "nose", "tongue", "skin"];
+const tipSeen = new Set();
+for (const organId of senseIds) {
+  for (const targetId of senseIds.concat(["chew", "not-sense"])) {
+    const result = lab.judgeMatch(organId, targetId);
+    const organName = lab.organById(organId).name;
+    if (organId === targetId) {
+      assert(result.type === "correct", "correct " + organId);
+      assert(!result.message.includes("再試一次"), "praise is not a retry tip");
+      continue;
+    }
+    assert(result.type === "retry", "retry " + organId + " " + targetId);
+    assert(result.message !== "再試一次。", "not a bare retry " + organId + " " + targetId);
+    assert(result.message.includes(organName), "tip names organ " + organId + " " + targetId);
+    if (targetId === "not-sense") {
+      assert(result.message.includes("感覺器官"), "not-sense idea " + organId);
+    } else {
+      assert(result.message.includes(lab.functionText(targetId)), "tip names function " + organId + " " + targetId);
+    }
+    if (targetId === "chew") assert(result.message.includes("不是感覺功能"), "chew idea " + organId);
+    assert(!tipSeen.has(result.message), "unique tip " + organId + " " + targetId + " " + result.message);
+    tipSeen.add(result.message);
+  }
+}
 
 const q = Object.fromEntries(lab.QUESTIONS.map((item) => [item.id, item]));
 
@@ -102,14 +129,14 @@ for (const item of lab.QUESTIONS) {
   const picture = icons.scene(item.id);
   const file = sceneFiles[item.id];
   assert(!/object-fit:\s*cover/.test(picture), "scene not cover " + item.id);
-  assert(picture.includes("<img") && picture.includes("assets/scenes/" + file + "?v=5"), "scene " + item.id);
+  assert(picture.includes("<img") && picture.includes("assets/scenes/" + file + "?v=6"), "scene " + item.id);
   assert(picture.includes('class="scene-photo"'), "scene photo class " + item.id);
   assert(fs.existsSync(path.join(root, "assets/scenes/" + file)), "scene file " + item.id);
 }
 
 for (const name of ["eye", "ear", "nose", "tongue", "skin", "tooth"]) {
   const picture = icons.icon(name);
-  assert(picture.includes("<img") && picture.includes("assets/organs/" + name + ".png?v=5"), "emoji " + name);
+  assert(picture.includes("<img") && picture.includes("assets/organs/" + name + ".png?v=6"), "emoji " + name);
   assert(!picture.includes("<svg"), "organ not svg " + name);
   assert(fs.existsSync(path.join(root, "assets/organs/" + name + ".png")), "file " + name);
   assert(!fs.existsSync(path.join(root, "assets/organs/" + name + ".webp")), "webp removed " + name);
@@ -155,15 +182,15 @@ assert(css.includes(".tip-dialog"), "tip popup style");
 const indexHtml = fs.readFileSync(path.join(root, "index.html"), "utf8");
 assert(!indexHtml.includes("teacher"), "teacher block removed");
 assert(!indexHtml.includes("三分鐘"), "teacher demo removed");
-assert(indexHtml.includes("css/styles.css?v=5"), "index css cache");
-assert(indexHtml.includes("js/icons.js?v=5"), "index js cache");
+assert(indexHtml.includes("css/styles.css?v=6"), "index css cache");
+assert(indexHtml.includes("js/icons.js?v=6"), "index js cache");
 assert(!indexHtml.includes("?v=2"), "index cache bumped");
 
 for (const file of ["match.html", "scenario.html"]) {
   const html = fs.readFileSync(path.join(root, file), "utf8");
   assert(!html.includes("js-speak"), file + " has no page speak button");
-  assert(html.includes("js/speech.js?v=5"), file + " speech script");
-  assert(html.includes("css/styles.css?v=5"), file + " css cache");
+  assert(html.includes("js/speech.js?v=6"), file + " speech script");
+  assert(html.includes("css/styles.css?v=6"), file + " css cache");
   assert(!html.includes("?v=2"), file + " cache bumped");
 }
 
@@ -183,7 +210,8 @@ const matchHtml = fs.readFileSync(path.join(root, "match.html"), "utf8");
 assert(matchHtml.includes('id="tip-dialog"'), "match tip dialog");
 assert(matchHtml.includes('id="tip-speak"'), "match tip 朗讀 button");
 assert(matchHtml.includes(">朗讀<"), "match tip 朗讀 label");
-assert(!matchHtml.includes("?v=4"), "match cache is v5");
+assert(!matchHtml.includes("?v=5"), "match cache is v6");
+assert(matchJs.includes('setAttribute("data-speak", message)'), "朗讀 reads the full tip");
 assert(matchJs.includes("touchend"), "touch drop");
 assert(scenarioJs.includes("js-option-speak"), "scenario option speak");
 assert(scenarioJs.includes("朗讀"), "scenario speak label");

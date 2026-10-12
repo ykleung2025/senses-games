@@ -768,16 +768,17 @@ dialog::backdrop { background: rgba(24, 40, 36, 0.48); }
 dialog h2 { font-size: 1.55rem; }
 
 .tip-dialog {
-  width: min(380px, calc(100vw - 28px));
+  width: min(440px, calc(100vw - 28px));
   text-align: center;
   padding: 18px 16px 16px;
 }
 
 .tip-text {
   margin: 10px 0 16px;
-  font-size: 1.28rem;
+  font-size: 1.18rem;
   font-weight: 700;
-  line-height: 1.45;
+  line-height: 1.5;
+  text-align: left;
   color: var(--bad-ink);
   background: var(--bad-bg);
   border-radius: 16px;

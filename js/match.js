@@ -228,7 +228,10 @@
     if (organLocked(organId)) return;
     if (targetId !== "not-sense" && fnLocked(targetId) && organId !== "tooth") {
       state.selected = organId;
-      state.feedback = { kind: "bad", text: "這個已經配對了，選另一個功能。" };
+      state.feedback = {
+        kind: "bad",
+        text: "「" + lab.functionText(targetId) + "」已經配對了。請為" + lab.organById(organId).name + "選另一個功能。"
+      };
       render();
       showTip(state.feedback.text, "再試一次", "retry");
       return;
